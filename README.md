@@ -420,6 +420,43 @@ Use `git log` with graphical options to visualize the commit graph.
 ```bash
 git log --oneline --graph --all
 ```
+*Example output*:
+```sql
+*   3e7a6f7 Merge branch 'feature-xyz'
+|\
+| * 1f4d8c2 Add feature XYZ
+* | b5a1c3f Fix bug in authentication flow
+| * e6c1d14 Add unit tests for feature XYZ
+|/
+* 234ae42 Refactor database schema
+* a1c9e13 Initial commit
+```
+1.`--oneline`: This flag shows each commit on a single line for 
+brevity, each line including:
+- the **short hash** of the commit (e.g., `3e7a6f7`), a shortened 
+version of the full commit hash. 
+- the **commit message** (e.g., `Merge branch 'feature-xyz'), giving 
+a quick description of what the commit is about. 
+
+2. `--graph`: This option adds a visual representation of the commit 
+history's branching and merging structure. Characters like `*`, `|`, 
+`\`, `/` form a graph showing the relationships between commits:
+- `*`: indicates a commit. 
+- `|`, `\`, `/` represent paths or branches connecting commits, 
+helping to visualize how different branches diverge and merge back 
+togeher. 
+
+3. `--all`: This option displays the commit history from all 
+branches, not just the currently checked-out branch. 
+
+Therefore, in the case above, `* a1c9e13 Initial commit` is the very 
+first commit in the repository, marked as `initial commit`. `* 
+234ae42 Refactor database schema` is a regular commit on the main 
+branch. `| * 1f4d8c2 Add feature XYZ` is a commit on the 
+`feature-xyz` branch (`*`), connected to the main branch by `|`. The 
+commit message indicates that the `XYZ` feature was added. `| * 
+e6c1d14 Add unit tests for feature XYZ` is another commit on the 
+`feature-xyz` branch. 
 
 *Detailed Graph:
 ```bash
