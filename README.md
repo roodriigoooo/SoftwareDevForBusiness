@@ -4,13 +4,13 @@
 1. [Introduction to Git and Version 
 Control](#introduction-to-git-and-version-control)
 2. [Branch Labels](#branch-labels)
-3. [Git Tags and '''git show'''](#git-tags-and-git-show)
+3. [Git Tags and `git show`](#git-tags-and-git-show)
 4. [Branches](#branches)
 	- [Creating a Branch](#creating-a-branch)
 	- [Checking Out a Branch](#checking-out-a-branch)
 	- [Deleting a Branch](#deleting-a-branch)
 	- [Undoing a Branch Deletion with 
-'''reflog'''](#undoing-a-branch-deletion-with-reflog)
+`reflog`](#undoing-a-branch-deletion-with-reflog)
 5. [Merging](#merging)
 	- [Merging Commits](#merging-commits)
 	- [Fast-Forward Merges](#fast-forward-merges)
@@ -60,51 +60,51 @@ usually named main or master.
 - Tags are references that point to specific points in Git history. Mark 
 release points (e.g., v1.0, v2.0) for easy acccess. 
 - *Types of tags*:
-	-*Annotated Tags*: Stored as full objects in the Git database. 
-	-*Lightweight Tags*: Simple pointers to a commut, not stored as 
+	-**Annotated Tags**: Stored as full objects in the Git database. 
+	-**Lightweight Tags**: Simple pointers to a commut, not stored as 
 objects. 
 
 - Listing Branches:
-'''bash
+```bash
 git branch
-'''
+```
 
 - Listing Tags:
-'''bash
+```bash
 git tag
-'''
+```
 
 3. Git Tags and git show
 Tags are used to mark specific points in history as being important. 
-- *Annotated Tags*: Store metadata: tagger name, email, date, and a 
+- **Annotated Tags**: Store metadata: tagger name, email, date, and a 
 message. 
-'''bash
+```bash
 git tag -a v1.0 -m "Release version 1.0"
-'''
+```
 
-- *Lightweight Tags*: Just a pointer to a commit.
-'''bash
+- **Lightweight Tags**: Just a pointer to a commit.
+```bash
 git tag v1.0
-'''
+```
 
 ### Pushing Tags to Remote
-Note that, by default, '''git push''' does not transfer tags to remote 
+Note that, by default, `git push` does not transfer tags to remote 
 repositories. These need to be explicitly pushed:
-'''bash
+```bash
 git push origin v1.0
-'''
+```
 
 Or push all tags:
-'''bash
+```bash
 git push origin --tags
-'''
+```
 
 The commit details being pointed to can be displayed using git show, 
 including the tag message if it is an annotated tag.
 
-'''bash
+```bash
 git show v1.0
-'''
+```
 
 # Branches
 Branches are a way to work in different version of a repository at one 
@@ -119,47 +119,47 @@ only into the main.
 
 Creating a branch: Create a new branch called '''feature-branch''' 
 pointing to the current commit. 
-'''bash
+```bash
 git branch feature-branch
-'''
+```
 
 Checking out a branch: Switch the working directory to the specified 
 branch. 
-'''bash
+```bash
 git checkout feature-branch
-'''
+```
 
 Create and switch in one command:
-'''bash
+```bash
 git checkout -b new feature
-'''
+```
 
-Deleting a branch: Deletes '''feature-branch''' if it has been merged to 
+Deleting a branch: Deletes `feature-branch` if it has been merged to 
 the current branch. 
-'''bash
+```bash
 git branch -d feature-branch
-'''
+```
 
-Force delete: Deletes '''feature-branch''' regardless of its merge status.
-'''bash
+Force delete: Deletes `feature-branch` regardless of its merge status.
+```bash
 git branch -D feature-branch
-'''
+```
 
 *Undoing a branch deletion with reflog*
 git reflog shows a log of all the actions (commits, checkouts, resets) tht 
 have moved to HEAD.
-'''bash
+```bash
 git reflog
-'''
+```
 
 Find the commit hash: Look for the commit where the branch pointed to 
 before deletion.
 
 Afterwards, we can create a new branch feature-branch pointing to the 
 specificed commit:
-'''bash
+```bash
 git branch feature-branch <commit-hash>
-'''
+```
 
 # Merging 
 Merging is the process of integrating changes from one branch into 
@@ -176,13 +176,13 @@ modified differently in the branches being merged.
 *Merge Commits*: Commits that have more than one parent, typically two. 
 They represent the convergence of two branches. 
 
-Merges '''feature-branch''' into '''main'''. If '''main''' has progressed 
+Merges `feature-branch` into `main`. If `main` has progressed 
 since the creation of the branch, Git performs a three-way merge, 
 resulting in a new merge commit:
- '''bash
+```bash
 git checkout main
 git merge feature-branch
-'''
+```
 
 *Fast-Forward Merges*: Occur when the branch you are merging has all of 
 the commits ahead of your current branch and there are no divergent 
@@ -195,20 +195,20 @@ commits between the branches).
 *Note*: Since a FF Merge does not create a new commit, it does not capture 
 the history of the merge event.  
 
-If '''main''' has not progressed and '''feature-branch''' is ahead, Git 
-simply moves '''main''' to point to the same commit as 
-'''feature-branch'''. 
+If `main` has not progressed and `feature-branch` is ahead, Git 
+simply moves `main` to point to the same commit as 
+`feature-branch`. 
 
-'''bash
+```bash
 git checkout main
 git merge feature-branch
-'''
+```
 
-*Forcing No Fast-Forward*: For when we want to create a merge commit even 
-when a fast-forward is possible. Useful to preserve the branch history.
-'''bash
+**Forcing No Fast-Forward**: For when we want to create a merge commit 
+even when a fast-forward is possible. Useful to preserve the branch history.
+```bash
 git merge --no-ff feature-branch
-'''
+```
  
 # Resolving Merge Conflicts
 Merge conflics happen when Git cannot automatically merge changes. Thes 
@@ -221,13 +221,13 @@ and MERGE_HEAD (the commit(s) from the branch we are merging).
 *Identifying Conflicted Parts*: When a conflic occurs, Git marks the 
 conflict in the affected lines:
 
-'''
+```
 <<<<<<< HEAD
 Your changes (from current branch)
 =======
 Incoming changes (from merged branch)
 >>>>>>> feature-branch
-'''
+```
 
 *Fixing Files with Conflicts*:
 1. Open the conflicted file: Using vim, nano, etc. 
@@ -235,13 +235,13 @@ Incoming changes (from merged branch)
 the file to combine changes if necessary. Remove the conflict markers 
 (<<<, ===, >>>). 
 3. Mark the conflict as resolved:
-'''bash
+```bash
 git add <file>
-'''
+```
 4. Commit the merge:
-'''bash
+```bash
 git commit
-'''
+```
 
 # Fetching Pulling and Pushing
 Commands used to synchronize our local repository with a remote one. 
@@ -249,28 +249,28 @@ Commands used to synchronize our local repository with a remote one.
 ## Fetching
 Download commits, files, and refs from a remote repository into our local 
 one, but do not merge them. 
-'''bash
+```bash
 git fetch origin
-'''
+```
 
 ## Pulling
-Fetches and then merges changes from the remote '''main''' branch into our 
+Fetches and then merges changes from the remote ```main``` branch into our 
 current branch. 
-'''bash
+```bash
 git pull origin main
-'''
+```
 or, equivalently:
-'''bash
+```bash
 git fetch origin 
 git merge origin/main
-'''
+```
 
 ## Pushing
-Upload your local commits on '''feature-branch''' to the remote 
+Upload your local commits on `feature-branch` to the remote 
 repository. 
-'''bash
+```bash
 git push origin feature-branch
-'''
+```
 
 *Best Practices*:
 - Pull before push: Always pull changes from the remote repository before 
@@ -283,49 +283,49 @@ Commands to undo changes at various stages.
 
 *Unstaging Changes*: Remove <file> from the staging area but leave 
 working directory unchanged.
-'''bash
+```bash
 git reset HEAD <file>
-'''
+```
 
 *Discarding Local Changes*: Revert <file> in the working directory to 
 match the HEAD commit. 
-'''bash
+```bash
 git checkout <file>
-'''
+```
 
 *Reverting Commits*: Create a new commit that undoes the changes from 
 <commit-hash>. Useful when we need to undo a commit that has already been 
 shared with others. 
-'''bash
+```bash
 git revert <commit-hash>
-'''
+```
 
 *Resetting Commits*:
 - Soft Reset: Move the branch pointer to <commit-hash>; staging area and 
 working directory remain unchanged. 
-'''bash
+```bash
 git reset --soft <commit-hash>
-'''
+```
 
 - Mixed Reset: Move the branch pointer and reset the staging area to match 
 <commit-hash>; working directory remains unchanged. 
-'''bash
+```bash
 git reset <commit-hash>
-'''
+```
 
 - Hard Reset: Moves the branch pointer, resets the staging area and 
 working directory to match <commit-hash>. *This discards uncommitted 
 changes.*
-'''bash
+```bash
 git reset --hard <commit-hash>
 # use carefully, can lead to data loss
-'''
+```
 
 *Amending Commits*: Modify the most recent commit. Useful when fixing 
 minor mistakes in the last commit that have not been yet pushed. 
-'''bash
+```bash
 git commit --amend -m "Updated commit message"
-'''
+```
 
 # Pull Requests
 Pull requests allow users to 1) review changes before they are merged 
@@ -336,25 +336,25 @@ tests and checks before merging.
 In a shared repo model, all collaborators have push access. 
 
 1. Create a branch
-'''bash
+```bash
 git checkout -b feature-branch
-'''
+```
 
 2. Make changes and commits
-'''bash
+```bash
 git add .
 git commit -m "Implement feature X"
-'''
+```
 
 3. Push the branch to remote:
-'''bash
+```bash
 git push origin feature-branch
-'''
+```
 
 4. Open a pull request:
 	- Navigate to the repository on the platform (GitHub)
 	- Click on "New Pull Request"
-	- Select '''feature-branch''' as the source and '''main''' as the 
+	- Select `feature-branch` as the source and `main` as the 
 target. 
 	- Add a description and submit.
 
@@ -365,30 +365,31 @@ the main repository.
 1. Fork the Repository:
 	- Click on "Fork" on GitHub to create a copy under your account. 
 2. Clone the fork:
-'''bash
+```bash
 git clone <forked-repo-url>
-'''
+```
 
 3. Add upstream remote:
-'''git bash
+```git bash
 git remote add upstream <original-repo-url>
-'''
+```
 
 4. Sync with upstream:
-'''bash
+```bash
 git fetch upstream
 git checkout main
 git merge upstream/main
+```
 
 5. Create a branch and make changes:
-'''bash
+```bash
 git checkout -b feature-branch
-'''
+```
 
 6. Push to the fork:
-'''bash
+```bash
 git push origin feature-branch
-'''
+```
 
 7. Open a pull request:
 	- Go to the original repository on GitHub.
@@ -413,19 +414,19 @@ commits are added.
 	- *Tags*: Static pointers to specific commits. 
 
 ## Visualizing Commit History
-Use '''git log''' with graphical options to visualize the commit graph. 
+Use `git log` with graphical options to visualize the commit graph. 
 *Compact Graph*:
-'''bash
+```bash
 git log --oneline --graph --all
-'''
+```
 
 *Detailed Graph:
-'''bash
+```bash
 git log --graph --decorate --pretty=oneline --abbrev-commit
-'''
+```
 
 *Example output*:
-'''sql
+```sql
 * commit e5f6d7a (HEAD -> main, origin/main)
 | Merge branch 'feature-branch'
 |
@@ -434,6 +435,6 @@ git log --graph --decorate --pretty=oneline --abbrev-commit
 | |
 |/
 * commit 9f8e7d6 Initial commit
-
+```
 - Branches: Lines diverging and converging represent branches. 
 - Merge commits: Points where branches converge. 
