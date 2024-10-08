@@ -31,7 +31,7 @@ Control](#introduction-to-git-and-version-control)
 	- [Multiple Repositories and 
 Forking](#multiple-repositories-and-forking)
 10.[Git Graph Structures](#git-graph-structures)
-	- [Understanding Commit Graphs)(#understanding-commit-graphs)
+	- [Understanding Commit Graph](#understanding-commit-graphs)
 	- [Visualizing Commit History](#visualizing-commit-history)
 
 # Introduction to Git and Version Control
@@ -60,8 +60,9 @@ usually named main or master.
 - Tags are references that point to specific points in Git history. Mark 
 release points (e.g., v1.0, v2.0) for easy acccess. 
 - *Types of tags*:
-	-**Annotated Tags**: Stored as full objects in the Git database. 
-	-**Lightweight Tags**: Simple pointers to a commut, not stored as 
+	
+1. **Annotated Tags**: Stored as full objects in the Git database. 
+2. **Lightweight Tags**: Simple pointers to a commut, not stored as 
 objects. 
 
 - Listing Branches:
