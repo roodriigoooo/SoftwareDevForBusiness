@@ -40,11 +40,43 @@ Git is a distributed version control system (DVCS) designed to handle
 everything from small to very large projects with speed and efficiency. It 
 allows multiple developers to work on a project simultaneously without 
 interfering with each other's changes. Some key featuers of Git are:
-- Distributed Architecture: Every developer has a full copy of the 
-repository, including its history. 
+- Distributed Architecture: Every developer has a full local copy of 
+the repository, including its history. Users can work offline. 
 - Efficient Handling of Large Projects: Git is optimized for performance 
 and can handle large repositories. 
 - Branching and Merging: Flexible workflows. 
+- Allows for complete project history and history tracking. 
+- Manages small changes. Test, undo or fix easily. 
+
+# Commits
+A git repository is a series of snapshots, or commits. Each commit 
+contains all the directories and files of the project at the time of 
+the snapshot. 
+- All commits belong to a **branch**.
+
+## On Git syntax
+```bash
+git [command][--flags][arguments]
+```
+- `-f` of `--flag` Dash or double dash change the command's 
+behaviour. 
+- `|` Vertical bar represents `OR`.
+- `[optional]` Optional values are surrounded by brackets. 
+- `<placeholders>` are surrounded by angle brackets, and they 
+indicate where a specific value should be placed. 
+```bash
+git commit -m <message>
+```
+- `[<optional placeholders>]
+- `--` standalone bashed indicate that whay follows is a path.
+```bash
+git checkout experiment
+#could be a file or path
+```
+```bash
+git checkout --experiment
+# Is a file
+``` 
 
 # Branching Labels 
 
@@ -55,6 +87,7 @@ reference.
 - A branch is a movable pointer to a commit. Its purpose 
 is to isolate work on a specific feature or bug fix. Default branches are 
 usually named main or master. 
+- Brances are independent lines of development of the project. 
 
 ## Tags
 - Tags are references that point to specific points in Git history. Mark 
@@ -112,10 +145,13 @@ Branches are a way to work in different version of a repository at one
 time. They can be understood through 2 main components:
 - *Branch Pointer*: A branch in Git is simply a pointer to a commit. 
 - *HEAD*: A special pointer that refers to the current branch. 
+- By default there is a single branch called master, or main. 
 
 ## Best Practices
-It is best to create a new branch for each feature or bug fix. In this 
-way, we can keep the main branch stable, and merge tested and stable code 
+Since a branch is ideally an independent line of development of a 
+project it is best to create a new branch for each feature or bug 
+fix. In this way, we can keep the main branch stable, and merge 
+tested and stable code 
 only into the main. 
 
 Creating a branch: Create a new branch called '''feature-branch''' 
