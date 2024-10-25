@@ -323,36 +323,50 @@ working directory unchanged.
 ```bash
 git reset HEAD <file>
 ```
+`HEAD` refers to the most recent commit on the current branch. Specifying 
+`HEAD` tells Git to reset the file's staged version to match the version 
+in the last commit. 
 
-*Discarding Local Changes*: Revert <file> in the working directory to 
-match the HEAD commit. 
-```bash
+ *Discarding Local Changes*: Revert <file> in the 
+working directory to match the HEAD commit. Replaces the changes in your 
+working directory for the specified file(s) with the version from the last 
+commit in the current branch.
+ ```bash
 git checkout <file>
 ```
 
 *Reverting Commits*: Create a new commit that undoes the changes from 
 <commit-hash>. Useful when we need to undo a commit that has already been 
-shared with others. 
-```bash
+shared with others, as it does not delete the commit but instead creates 
+a new one reversing the changes introduced by the target commit. **Commit 
+history is preserved.**
+
+ ```bash
 git revert <commit-hash>
 ```
 
 *Resetting Commits*:
 - Soft Reset: Move the branch pointer to <commit-hash>; staging area and 
-working directory remain unchanged. 
+working directory remain unchanged. Changes made in the commits after 
+`<commit-hash>` are "unstaged" but remain in the staging area. 
+
 ```bash
 git reset --soft <commit-hash>
 ```
 
 - Mixed Reset: Move the branch pointer and reset the staging area to match 
-<commit-hash>; working directory remains unchanged. 
+<commit-hash>; working directory remains unchanged. Changes from commits 
+after `<commit-hash>` will be retained in the working directory but will 
+no longer be staged for commit. 
+
 ```bash
 git reset <commit-hash>
 ```
 
 - Hard Reset: Moves the branch pointer, resets the staging area and 
 working directory to match <commit-hash>. *This discards uncommitted 
-changes.*
+changes.*. It is a destructive command as it will permanently discard 
+changes after `<commit-hash>`.
 ```bash
 git reset --hard <commit-hash>
 # use carefully, can lead to data loss
