@@ -1,4 +1,4 @@
-# Study Guide for Software Development for Business
+# Software Development for Business: Version Control and Docker 
 
 ## Table of Contents
 1. [Introduction to Git and Version 
