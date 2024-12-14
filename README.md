@@ -56,9 +56,9 @@ commit.
 
 ```mermaid
 gitGraph
-	commit id: "a commit in branch 'branch' with a hash" 
-	commit id: "a commit in branch 'branch' with a hash" 
-	commit id: "a commit in branch 'branch' with a hash" tag: "branch"
+	commit id: "older commits" 
+	commit id: "a commit in branch 'main' with a hash" 
+	commit id: "a commit in branch 'main' with a hash" tag: "main"
 ```
 - All local branch references are stored in `.git/refs/heads`:
 ```bash
@@ -135,6 +135,7 @@ git push <remote> <tagname>
 #to transfer all local tags
 git push <remote> --tags
 #Ex: git push origin --tags
+```
 
  ## Commits
 A git repository is a series of snapshots, or commits. Each commit 
