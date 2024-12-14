@@ -1,40 +1,6 @@
 # Software Development for Business: Version Control and Docker 
 
-## Table of Contents
-1. [Introduction to Git and Version 
-Control](#introduction-to-git-and-version-control)
-2. [Branch Labels](#branch-labels)
-3. [Git Tags and `git show`](#git-tags-and-git-show)
-4. [Branches](#branches)
-	- [Creating a Branch](#creating-a-branch)
-	- [Checking Out a Branch](#checking-out-a-branch)
-	- [Deleting a Branch](#deleting-a-branch)
-	- [Undoing a Branch Deletion with 
-`reflog`](#undoing-a-branch-deletion-with-reflog)
-5. [Merging](#merging)
-	- [Merging Commits](#merging-commits)
-	- [Fast-Forward Merges](#fast-forward-merges)
-	- [Squash Merges](#squash-merges)
-	- [Rebasing](#rebasing)
-6. [Resolving Merge Conflicts](#resolving-merge-conflicts)
-	- [The Commits Involved](#the-commits-involved)
-	- [Identifying Conflicted Parts](#identifying-conflicted-parts)
-	- [Fixing Files with Conflicts](#fixing-files-with-conflicts)
-7. [Fetching, Pulling, and Pushing](#fetching-pulling-and-pushing)
-8. [Git Undo Operations](#git-undo-operations)
-	- [Undoing Changes](#undoing-changes)
-	- [Reverting Commits](#reverting-commits)
-	- [Resetting Commits](#resetting-commits)
-	- [Amending Commits](#amending-commits)
-9. [Pull Requests](#pull-requests)
-	- [Single Repository](#single-repository)
-	- [Multiple Repositories and 
-Forking](#multiple-repositories-and-forking)
-10.[Git Graph Structures](#git-graph-structures)
-	- [Understanding Commit Graph](#understanding-commit-graphs)
-	- [Visualizing Commit History](#visualizing-commit-history)
-
-# Introduction to Git and Version Control
+# Git and Version Control
 
 Git is a distributed version control system (DVCS) designed to handle 
 everything from small to very large projects with speed and efficiency. It 
@@ -48,7 +14,129 @@ and can handle large repositories.
 - Allows for complete project history and history tracking. 
 - Manages small changes. Test, undo or fix easily. 
 
-# Commits
+## Git's Graph Model
+
+- Git uses Directed Acyclic Graphs (DAG) to define the relationship between 
+the commits and the repository, where the arrows point to the a given 
+commit's parents.
+- Each commit is a node. 
+
+```mermaid
+gitGraph
+	commit 
+	commit
+	branch a_branch
+	checkout a_branch
+	commit 
+	checkout main
+	branch another_branch
+	checkout another_branch
+	commit 
+	checkout main 
+	merge a_branch
+	merge another_branch
+```
+
+## Git References
+
+- References are helpful when navigating and managing commit histories. 
+They make it easy to track, organize, and switch between different states 
+of a repository. 
+- A reference or `ref` in Git point to:
+	1. A specific commit SHA-1 hash. All commit sgenerate a unique 
+SHA-1 hash as an identifier, for tracking and integrity. 
+	2. Another, symbolic reference ('master', 'main', 
+'name_of_branch', etc.) 
+- Types of references include branch references, tags, and HEAD.
+
+### Branch Labels 
+- A branch label is a reference that will point to the most recent commit 
+in that branch. Recall that a branch is just a pointer to a specific 
+commit. 
+
+```mermaid
+gitGraph
+	commit id: "a commit in branch 'branch' with a hash" 
+	commit id: "a commit in branch 'branch' with a hash" 
+	commit id: "a commit in branch 'branch' with a hash" tag: "branch"
+```
+- All local branch references are stored in `.git/refs/heads`:
+```bash
+cd .git && ls
+```
+```bash
+#output
+COMMIT_EDITMSG	 ORIG_HEAD   description   index   logs   packed-refs
+HEAD   config   hooks   info   objects   refs
+```
+```bash
+cd refs && ls
+```
+```bash
+#output
+heads   tags
+```
+```bash 
+cd heads && ls
+```
+```bash
+#output
+main   another_branch   all_other_branches
+```
+### The HEAD reference
+- It is a reference to the commit we are currently in. There is only one 
+HEAD per repository. 
+- Therefore, it will usually point to the branch label of the current 
+branch, unless we are working in a commit that is not the most recent one. 
+
+```bash
+cd .git && cat HEAD
+```
+```bash
+#output
+ref: refs/heads/main
+```
+
+### Tags
+
+#### Lightweight Tags:
+- A pointer to a specific commit, just like a branch, but without any 
+additional metadata. It therefore simply marks the commit with a name. 
+```bash
+git tag <tagname> [<commit>]
+#HEAD is the default value for <commit>
+#Ex: git tag v1.0 will tag the commit we are currently in as v1.0. 
+```
+```mermaid
+gitGraph
+	commit 
+	commit 
+	commit tag: "v1.0"
+```
+#### Annotated Tags
+- Full objects stored in the Git database containing tagger's name, email, 
+date of tagging, a tagging message, and other metadata.
+- These are used for marking important releases or points in a given 
+project's history. 
+```bash
+git tag -a [-m <msg>|-F <file>] <tagname> [<commit>]
+#-F <file> indicates the file containing the text message
+#Ex: git tag -a v1.0 -m "Version1.0release"
+```
+#### On Pushing Tags
+`git push` does not transfer tags to the remote repository by default. We 
+need to transfer these manually.
+```bash
+#to tranfer a specific, single tag
+git push <remote> <tagname>
+#Ex: git push origin v1.0
+```   
+```bash
+#to transfer all local tags
+git push <remote> --tags
+#Ex: git push origin --tags
+
+ ## Commits
 A git repository is a series of snapshots, or commits. Each commit 
 contains all the directories and files of the project at the time of 
 the snapshot. 
@@ -77,7 +165,6 @@ git checkout experiment
 git checkout --experiment
 # Is a file
 ``` 
-
 # Branching Labels 
 
 In Git, branches and tags are used to label specific commits for easier 
