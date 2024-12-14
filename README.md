@@ -173,6 +173,7 @@ gitGraph
 	commit
 	commit
 	branch new_branch
+	checkout new_branch
 ```
 
 ## On Git syntax
