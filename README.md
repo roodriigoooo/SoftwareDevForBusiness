@@ -1,4 +1,43 @@
 # Software Development for Business: Version Control Using Git 
+
+## Table of Contents
+
+  - [Reading Git Information and Credentials](#reading-git-information-and-credentials)
+    - [Username and Email](#username-and-email)
+- [Git and Version Control](#git-and-version-control)
+  - [Git's Graph Model](#gits-graph-model)
+  - [Git References](#git-references)
+    - [Branch Labels](#branch-labels)
+      - [Branches](#branches)
+    - [The HEAD Reference](#the-head-reference)
+    - [Tags](#tags)
+      - [Lightweight Tags](#lightweight-tags)
+      - [Annotated Tags](#annotated-tags)
+      - [On Pushing Tags](#on-pushing-tags)
+  - [Branches](#branches-1)
+    - [Undoing Branch Deletes](#undoing-branch-deletes)
+  - [Merging](#merging)
+    - [Fast-forward Merge](#fast-forward-merge)
+    - [Merge Commits](#merge-commits)
+  - [Resolving Merge Conflicts](#resolving-merge-conflicts)
+  - [Fetch, Pull and Push](#fetch-pull-and-push)
+    - [Clone](#clone)
+    - [Fetch](#fetch)
+    - [Pull](#pull)
+      - [Git Pull Behavior](#git-pull-behavior)
+    - [Push](#push)
+      - [Tracking Branches](#tracking-branches)
+  - [Git Undo](#git-undo)
+    - [git revert](#git-revert)
+    - [git reset](#git-reset)
+    - [git commit --amend](#git-commit---amend)
+  - [Pull Requests](#pull-requests)
+  - [Single Repository](#single-repository)
+  - [Multiple Repositories and Forking](#multiple-repositories-and-forking)
+- [Git Graph Structures](#git-graph-structures)
+  - [Understanding Commit Graphs](#understanding-commit-graphs)
+  - [Visualizing Commit History](#visualizing-commit-history)
+
 ### Reading Git Information and Credentials
 
 - `-f` of `--flag` Dash or double dash change the command's 
@@ -402,6 +441,7 @@ git clone --depth 2 <remote_url>
 ```
 
 ### Fetch
+Copies the commits from the remote repository to the local one, but not does not update the branch's HEAD. 
 - When we want to see what others have been working on. 
 - When checking if there are updated before merging. 
 - When updating our remote tracking branches. 
@@ -424,6 +464,7 @@ git fetch --prune
 ```
 
 ### Pull
+Fetches and automatically merges changes into the current local branch's label (HEAD).
 - When we want to update our local branch with remote changes. 
 - When we are ready to incorporate other's work into our local branch. 
 - When starting to work and need the latest changes first. 
@@ -439,302 +480,261 @@ git pull origin main
 git pull --rebase
 ```
 
+#### Git Pull Behavior
+`git pull` behaves differently depending on the merge situation.
+We can modify this behavior using:
+```bash
+git pull --rebase # rebase instead of merge
+git pull --ff-only # will fail if fast-forward is not possible
+```
+
+**In a fast-forward situation**:
+
+Local
+```mermaid
+gitGraph
+	commit id: "A"
+	commit id: "B"
+	commit id: "C"
+```
+Remote
+```mermaid
+gitGraph
+	commit id: "A"
+	commit id: "B"
+	commit id: "C"
+	commit id: "D"
+```
+After pull local:
+```mermaid
+gitGraph
+	commit id: "A"
+	commit id: "B"
+	commit id: "C"
+	commit id: "D"
+```
+Git simply moves the local branch pointer forward. 
+
+**When branches have diverged**:
+Local
+```mermaid
+gitGraph
+	commit id: "A"
+	commit id: "B"
+	commit id: "C"
+	commit id: "D"
+```
+Remote:
+```mermaid
+gitGraph
+	commit id: "A"
+	commit id: "B"
+	commit id: "E"
+	commit id: "F"
+```
+After pull local:
+```mermaid
+gitGraph
+	commit id: "A"
+	commit id: "B"
+	branch origin/main
+	checkout origin/main
+	commit id: "E"
+	commit id: "F"
+	checkout main
+	commit id: "C"
+	commit id: "D"
+	merge origin/main
+```
+Git creates a merge commit to combine the diverged histories.
+
 ### Push
-
-
-
-## Tags
-- Tags are references that point to specific points in Git history. Mark 
-release points (e.g., v1.0, v2.0) for easy acccess. 
-- *Types of tags*:
-	
-1. **Annotated Tags**: Stored as full objects in the Git database. 
-2. **Lightweight Tags**: Simple pointers to a commut, not stored as 
-objects. 
-
-- Listing Branches:
+Used to add commits to the remote repository.
+- When sharing completed work with others.
+- When publishing local commits to the remote. 
+- When creating a new remote branch.
 ```bash
-git branch
-```
+# push current branch to origin
+git push 
 
-- Listing Tags:
+# push to specific remote and specific branch
+git push origin feature/new-feature
+
+# push all branches
+git push --all
+
+# force push (use carefully!)
+git push --force
+
+# push and set upstream tracking
+git push -u origin feature/new-feature
+
+# push tags
+git push --tags
+
+# delete remote branch
+git push origin --delete old_branch
+```
+#### Tracking Branches
+A tracking branch (or upstream branch) is a local branch that has a direct relationship with a remote branch. You can think of it as your local branch "knowing" which remote branch it should sync with.
+- Git knows were to push/pull by default.
+- We can see how many commits we are ahead/behind.
+- `git status` would show relationship with remote branch.
+
+**Setting up tracking**:
 ```bash
-git tag
-```
+# when pushing a new branch
+git push -u origin feature
+#or
+git push --set-upstream origin feature #this one we saw in class
 
-3. Git Tags and git show
-Tags are used to mark specific points in history as being important. 
-- **Annotated Tags**: Store metadata: tagger name, email, date, and a 
-message. 
+# for existing branches
+git branch --set-upstream-to=origin/feature feature
+
+#check tracking relationships
+git branch -vv
+```
+After tracking, we can achieve the following:
 ```bash
-git tag -a v1.0 -m "Release version 1.0"
-```
+# instead of
+git push origin feature
+git pull origin feature
 
-- **Lightweight Tags**: Just a pointer to a commit.
+# we can just use
+git pull
+git push 
+```
+## Git Undo
+Git includes many ways to undo changes. However, **it is important not to rewrite history that is shared with others**. This would bring a lot of confusion and conflicts to collaborators relying on the original history for context and change tracking. 
+
+### `git revert`
+Create a new commit that undoes changes. **Safest for shared branches, as it does not rewrite history**.
+
+1. Find the previous commit. 
+2. Use it to make a new commit undoing the changes after said commit.
+
+Useful when undoing changes already pushed, and when we want to maintain a clear history of changes.
 ```bash
-git tag v1.0
-```
+# general form
+git revert <commit hash>
 
-### Pushing Tags to Remote
-Note that, by default, `git push` does not transfer tags to remote 
-repositories. These need to be explicitly pushed:
+# revert most recent commit
+git revert HEAD
+
+# revert commit before HEAD
+git revert HEAD~1
+
+# revert specific commit
+git revert abc123
+
+# revert multiple commits
+git revert abc123..def456
+```
+```mermaid
+gitGraph
+	commit id: "A"
+	commit id: "B"
+	commit id: "C"
+```
+We want to get rid of the changes of commit B. 
+
+```mermaid
+gitGraph
+	commit id: "A"
+	commit id: "B"
+	commit id: "C"
+	commit id: "D" tag: "with content from A"
+```
+**Note**: Reverting a commit does not delete it from the history. It simply adds a new, independent commit that reverses changes done after a specified commit.
+Therefore, git revert can be reverted itself if needed.
+
+### `git reset`
+Moves the branch pointer to a different specified commit, with different effects on working directory.
 ```bash
-git push origin v1.0
+# soft reset: move branch pointer but keep all staged changes
+git reset --soft <commit>
+
+# mixed reset (default): move branch pointer and unstage changes
+git reset <commit>
+# or
+git reset --mixed <commit>
+
+# hard reset: move branch pointer and discard all changes
+git reset --hard <commit>
+
+# reset specific files
+git reset file1.txt file2.txt
+
+# reset to specific commit defined by other means
+git reset HEAD~1
 ```
+**Note**: Alters commit history!
 
-Or push all tags:
-```bash
-git push origin --tags
+#### Understanding `git revert`:
+We have the following scenario:
+```mermaid
+gitGraph
+	commit id: "A"
+	commit id: "B"
+	commit id: "C, HEAD"
 ```
+- `fileA.txt` has been modified, but not staged. 
+- `fileB.txt` has been staged, but not committed. 
+- `fileC.txt` has been committed in commit C.
 
-The commit details being pointed to can be displayed using git show, 
-including the tag message if it is an annotated tag.
+1. `git reset --soft HEAD~1`
 
-```bash
-git show v1.0
+**Use Case**: When we want to undo a commit but keep all changes ready to commit again.
+
+Result
+```mermaid
+gitGraph
+	commit id: "A"
+	commit id: "B, HEAD"
 ```
+- Branch pointer moved back to B. 
+- All changes from commit C are preserved and staged. Working directory remains unchanged. 
+- `fileA.txt` is still modified, unstaged. 
+- `fileB.txt` is still staged. 
+- `fileC.txt` changes from C are now staged.
 
-# Branches
-Branches are a way to work in different version of a repository at one 
-time. They can be understood through 2 main components:
-- *Branch Pointer*: A branch in Git is simply a pointer to a commit. 
-- *HEAD*: A special pointer that refers to the current branch. 
-- By default there is a single branch called master, or main. 
+2. `git reset --mixed HEAD~1`
 
-## Best Practices
-Since a branch is ideally an independent line of development of a 
-project it is best to create a new branch for each feature or bug 
-fix. In this way, we can keep the main branch stable, and merge 
-tested and stable code 
-only into the main. 
+**Use Case**: When we want to start over with staging and committing. Good for reorganizing changed into different commits. 
 
-Creating a branch: Create a new branch called '''feature-branch''' 
-pointing to the current commit. 
-```bash
-git branch feature-branch
-```
+Graph would be the same. Now, all changes from commit C are preserved, but **UNSTAGED**.
+- Working directory is still unchanged. 
+- `fileA.txt` is still modified, unstaged. 
+- `fileB.txt` is now unstaged (!).
+- `fileC.txt` changes from C are now also unstaged.
 
-Checking out a branch: Switch the working directory to the specified 
-branch. 
-```bash
-git checkout feature-branch
-```
+3. `git reset --hard HEAD~1
 
-Create and switch in one command:
-```bash
-git checkout -b new feature
-```
+**Use Case**: When we want to completely abandon changes. Useful when discarding experimental changes, or when starting fresh from a known good state.
 
-Deleting a branch: Deletes `feature-branch` if it has been merged to 
-the current branch. 
-```bash
-git branch -d feature-branch
-```
+Graph would be the same. **Now all staged and working directory changes would be discarded**.
+- `fileA.txt` all modifications discarded.
+- `fileB.txt` all staged changes discarded.
+- `fileC.txt` all changes from C discarded.
+### `git commit --amend`
+Modifies the most recent commit (add changes or change the commit message).
 
-Force delete: Deletes `feature-branch` regardless of its merge status.
-```bash
-git branch -D feature-branch
-```
-
-*Undoing a branch deletion with reflog*
-git reflog shows a log of all the actions (commits, checkouts, resets) tht 
-have moved to HEAD.
-```bash
-git reflog
-```
-
-Find the commit hash: Look for the commit where the branch pointed to 
-before deletion.
-
-Afterwards, we can create a new branch feature-branch pointing to the 
-specificed commit:
-```bash
-git branch feature-branch <commit-hash>
-```
-
-# Merging 
-Merging is the process of integrating changes from one branch into 
-another. 
-
-*Types of Merges*: 
-- *Fast-Forward Merge*: Moves the branch pointer forward. 
-- *Three-Way Merge (Merge Commits)*: Creates a new commit that has more 
-than one parent. 
-
-*Merge Conflicts*: These occur when the same part of the code has been 
-modified differently in the branches being merged. 
-
-*Merge Commits*: Commits that have more than one parent, typically two. 
-They represent the convergence of two branches. 
-
-Merges `feature-branch` into `main`. If `main` has progressed 
-since the creation of the branch, Git performs a three-way merge, 
-resulting in a new merge commit:
-```bash
-git checkout main
-git merge feature-branch
-```
-
-*Fast-Forward Merges*: Occur when the branch you are merging has all of 
-the commits ahead of your current branch and there are no divergent 
-commits. 
-*When is Fast-Forward possible?: Only possible when the current branch has 
-not diverged from the branch being merged. That is, the project follows a 
-linear history, where there are no commits with more than 1 parent (merge 
-commits between the branches).
-
-*Note*: Since a FF Merge does not create a new commit, it does not capture 
-the history of the merge event.  
-
-If `main` has not progressed and `feature-branch` is ahead, Git 
-simply moves `main` to point to the same commit as 
-`feature-branch`. 
-
-```bash
-git checkout main
-git merge feature-branch
-```
-
-**Forcing No Fast-Forward**: For when we want to create a merge commit 
-even when a fast-forward is possible. Useful to preserve the branch history.
-```bash
-git merge --no-ff feature-branch
-```
- 
-# Resolving Merge Conflicts
-Merge conflics happen when Git cannot automatically merge changes. Thes 
-conflicts occur when:
-- The same lines in the same files have been changed in both branches. 
-- A file deleted in one branch and modified in another. 
-The commits involved in a conflict are HEAD (the current commin on our branch) 
-and MERGE_HEAD (the commit(s) from the branch we are merging). 
-
-*Identifying Conflicted Parts*: When a conflic occurs, Git marks the 
-conflict in the affected lines:
-
-```
-<<<<<<< HEAD
-Your changes (from current branch)
-=======
-Incoming changes (from merged branch)
->>>>>>> feature-branch
-```
-
-*Fixing Files with Conflicts*:
-1. Open the conflicted file: Using vim, nano, etc. 
-2. Resolve the conflict: Decide what changes to keep, and manually edit 
-the file to combine changes if necessary. Remove the conflict markers 
-(<<<, ===, >>>). 
-3. Mark the conflict as resolved:
-```bash
-git add <file>
-```
-4. Commit the merge:
-```bash
-git commit
-```
-
-# Fetching Pulling and Pushing
-Commands used to synchronize our local repository with a remote one. 
-
-## Fetching
-Download commits, files, and refs from a remote repository into our local 
-one, but do not merge them. 
-```bash
-git fetch origin
-```
-
-## Pulling
-Fetches and then merges changes from the remote ```main``` branch into our 
-current branch. 
-```bash
-git pull origin main
-```
-or, equivalently:
-```bash
-git fetch origin 
-git merge origin/main
-```
-
-## Pushing
-Upload your local commits on `feature-branch` to the remote 
-repository. 
-```bash
-git push origin feature-branch
-```
-
-*Best Practices*:
-- Pull before push: Always pull changes from the remote repository before 
-pushing any changes to avoid merge conflicts. 
-- Use branch names: Specify the branch when pulling or pushing to avoid 
-confusion.
-
-# Git Undo Operations
-Commands to undo changes at various stages. 
-
-*Unstaging Changes*: Remove <file> from the staging area but leave 
-working directory unchanged.
-```bash
-git reset HEAD <file>
-```
-`HEAD` refers to the most recent commit on the current branch. Specifying 
-`HEAD` tells Git to reset the file's staged version to match the version 
-in the last commit. 
-
- *Discarding Local Changes*: Revert <file> in the 
-working directory to match the HEAD commit. Replaces the changes in your 
-working directory for the specified file(s) with the version from the last 
-commit in the current branch.
- ```bash
-git checkout <file>
-```
-
-*Reverting Commits*: Create a new commit that undoes the changes from 
-<commit-hash>. Useful when we need to undo a commit that has already been 
-shared with others, as it does not delete the commit but instead creates 
-a new one reversing the changes introduced by the target commit. **Commit 
-history is preserved.**
-
- ```bash
-git revert <commit-hash>
-```
-
-*Resetting Commits*:
-- Soft Reset: Move the branch pointer to <commit-hash>; staging area and 
-working directory remain unchanged. Changes made in the commits after 
-`<commit-hash>` are "unstaged" but remain in the staging area. 
+- To correct mistakes in the last commit (HEAD).
+- **Alters history. Avoid using on commits already pushed to a shared repository.**
 
 ```bash
-git reset --soft <commit-hash>
+git commit --amend -m "new message"
+
+# add forgotten files to last commit
+git add forgotten-file.txt
+git commit --amend --no-edit
+
+# change author
+git commit --amend --author="new author"
 ```
-
-- Mixed Reset: Move the branch pointer and reset the staging area to match 
-<commit-hash>; working directory remains unchanged. Changes from commits 
-after `<commit-hash>` will be retained in the working directory but will 
-no longer be staged for commit. 
-
-```bash
-git reset <commit-hash>
-```
-
-- Hard Reset: Moves the branch pointer, resets the staging area and 
-working directory to match <commit-hash>. *This discards uncommitted 
-changes.*. It is a destructive command as it will permanently discard 
-changes after `<commit-hash>`.
-```bash
-git reset --hard <commit-hash>
-# use carefully, can lead to data loss
-```
-
-*Amending Commits*: Modify the most recent commit. Useful when fixing 
-minor mistakes in the last commit that have not been yet pushed. 
-```bash
-git commit --amend -m "Updated commit message"
-```
-
-# Pull Requests
-Pull requests allow users to 1) review changes before they are merged 
-2) use a common plae to discuss proposed changes and 3) run automated 
+## Pull Requests
+Pull requests allow users to review changes before they are merged 
+and use a common place to discuss proposed changes and 3) run automated 
 tests and checks before merging. 
 
 ## Single Repository
