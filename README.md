@@ -57,8 +57,7 @@ commit.
 ```mermaid
 gitGraph
 	commit id: "older commits"  
-	commit id: "most recent commit in branch 'main' with a hash" tag: 
-"main"
+	commit id: "most recent commit in branch 'main' with a hash" tag: "main"
 ```
 - All local branch references are stored in `.git/refs/heads`:
 ```bash
