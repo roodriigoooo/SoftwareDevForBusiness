@@ -154,8 +154,10 @@ They can be either long-running or topic branches:
 git branch # to see list of branches in current repo
 git branch <name> # to create a branch with name <name>
 git checkout <branch or commit> # to checkout a branch, or a specific commit
+git checkout -b <name> # combination of git branch and checkout
 ```
-**Note**: using `git branch <name>` creates a new branch label reference. It does not change the branch you are currently in:
+**Note**: using `git branch <name>` just creates a new branch label reference. It does not change the branch you are currently in. In other words, the HEAD reference is unmoved.
+Using only `git branch`:
 ```mermaid
 gitGraph
 	commit
@@ -163,6 +165,14 @@ gitGraph
 	branch new_branch
 	checkout main
 	commit
+```
+`git checkout` is responsible for updating the HEAD reference, and of updating the working tree with the corresponding commit's (the new HEAD's) files.
+Using `git checkout -b`:
+```mermaid
+gitGraph
+	commit
+	commit
+	branch new_branch
 ```
 
 ## On Git syntax
