@@ -50,9 +50,16 @@ SHA-1 hash as an identifier, for tracking and integrity.
 - Types of references include branch references, tags, and HEAD.
 
 ### Branch Labels 
+#### Branches
+Branches are used to label specific commits for easier 
+reference. A branch is just a label for a commit.
+
+- A branch is a movable pointer to a commit. Its purpose 
+is to isolate work on a specific feature or bug fix. Default branches are 
+usually named main or master. 
+- Brances are independent lines of development of
 - A branch label is a reference that will point to the most recent commit 
-in that branch. Recall that a branch is just a pointer to a specific 
-commit. 
+in that branch. 
 
 ```mermaid
 gitGraph
@@ -136,11 +143,26 @@ git push <remote> --tags
 #Ex: git push origin --tags
 ```
 
- ## Commits
-A git repository is a series of snapshots, or commits. Each commit 
-contains all the directories and files of the project at the time of 
-the snapshot. 
-- All commits belong to a **branch**.
+## Branches
+Branches, that are just a set of specific commits, enable team development.
+They can be either long-running or topic branches:
+- Long-running branches are those where a significant, integral part of the project is developed, and are therefore long-running and not just ephimeral. Examples are the main branch, development branches, etc. 
+- Topic branches are narrow-focused and are aimed at fixing a bug, implementing a specific feature, etc.
+
+```bash
+#branch relevant commands
+git branch # to see list of branches in current repo
+git branch <name> # to create a branch with name <name>
+git checkout <branch or commit> # to checkout a branch, or a specific commit
+```
+**Note**: using `git branch <name>` creates a new branch label reference. It does not change the branch you are currently in:
+```mermaid
+gitGraph
+	commit
+	commit
+	branch new_branch
+	commit
+```
 
 ## On Git syntax
 ```bash
@@ -164,17 +186,7 @@ git checkout experiment
 ```bash
 git checkout --experiment
 # Is a file
-``` 
-# Branching Labels 
-
-In Git, branches and tags are used to label specific commits for easier 
-reference. 
-
-## Branches 
-- A branch is a movable pointer to a commit. Its purpose 
-is to isolate work on a specific feature or bug fix. Default branches are 
-usually named main or master. 
-- Brances are independent lines of development of the project. 
+```
 
 ## Tags
 - Tags are references that point to specific points in Git history. Mark 
