@@ -374,6 +374,16 @@ gitGraph
 	checkout main
 	commit id: "B, HEAD"
 ```
+**Example**
+```mermaid
+gitGraph
+	commit id: "new file"
+	branch feature
+	checkout feature
+	commit id: "modified fileA (feature)"
+	checkout main
+	commit id: "modified fileA"
+```
 ```bash
 #while on main
 git merge feature
