@@ -1,5 +1,37 @@
 # Software Development for Business: Version Control Using Git 
+### Reading Git Information and Credentials
 
+- `-f` of `--flag` Dash or double dash change the command's 
+behaviour. 
+- `|` Vertical bar represents `OR`.
+- `[optional]` Optional values are surrounded by brackets. 
+- `<placeholders>` are surrounded by angle brackets, and they 
+indicate where a specific value should be placed. 
+```bash
+git commit -m <message>
+```
+- `[<optional placeholders>]`
+- `--` indicate that what follows is a file.
+```bash
+git checkout experiment
+#could be a file or path
+```
+```bash
+git checkout --experiment
+# Is a file
+```
+#### Username and Email
+To set credentials:
+```bash
+git config [--local|--global|--system] <key> [<value>]
+#git config --global user.name "roodriigoooo"
+#git config --global user.email "myemail@gmail.com"
+```
+To check credentials:
+```bash
+git config user.name
+git config user.email
+```
 # Git and Version Control
 
 Git is a distributed version control system (DVCS) designed to handle 
@@ -155,6 +187,7 @@ git branch # to see list of branches in current repo
 git branch <name> # to create a branch with name <name>
 git checkout <branch or commit> # to checkout a branch, or a specific commit
 git checkout -b <name> # combination of git branch and checkout
+git branch -d <branchname> # delete a branch label
 ```
 **Note**: using `git branch <name>` just creates a new branch label reference. It does not change the branch you are currently in. In other words, the HEAD reference is unmoved.
 Using only `git branch`:
@@ -167,30 +200,88 @@ gitGraph
 ```
 `git checkout` is responsible for updating the HEAD reference, and of updating the working tree with the corresponding commit's (the new HEAD's) files.
 
+**Example**: In our local repository, we have `main` and another long-running branch, with many commits, called `develop`. 
+```bash
+git branch -d develop
+```
+The command ran above will **only delete the branch label locally**.
+1. It will only affect the local repository, not the remote one. 
+2. It will only remove the branch reference.
+3. It will NOT delete any commits or the actual commit history of the branch.
 
+The commits themselves remain in the Git repository and would still be accessible through other branches containing those commits, the `reflog`, direct referencing to commit hashes, and remote branches (like `origin/develop`).
+
+If we wanted to delete the remote branch, we would need to separately run:
+```bash
+git push origin --delete develop
+```
+Additionally, `git branch -d` will only work if the branch label we want to delete has already been fully merged into our current branch. If unmerged changes exist, Git will prevent the deletion to protect our work.
+If we want to delete an unmerged branch, we can force it with `-D`:
+```bash
+git branch -D develop
+```
+Note that, since we are only deleting the branch labels and not the commits themselves, the command above will leave us with commits belonging to no branch.
+
+### Undoing Branch Deletes
+```bash
+git reflog # returns a local list of recent HEAD commits
+```
+```bash
+git branch -d develop
+error: The branch 'develop' is not fully merged. 
+If you are sure you want to delete it, run 'git branch -D develop'.
+git branch -D develop
+Deleted branch develop (was 98a93831). #hash of the branch label deleted
+git reflog
+291a93a (HEAD -> main) HEAD@{0}: checkout: moving from develop to main
+98a93831 HEAD@{1}: commit: new experiment
+git checkout -b develop 98a93821
+Switched to a new branch 'develop'
 ## On Git syntax
 ```bash
 git [command][--flags][arguments]
 ```
-- `-f` of `--flag` Dash or double dash change the command's 
-behaviour. 
-- `|` Vertical bar represents `OR`.
-- `[optional]` Optional values are surrounded by brackets. 
-- `<placeholders>` are surrounded by angle brackets, and they 
-indicate where a specific value should be placed. 
+**Breakdown of the above**:
+The `reflog` is like Git's local journal of everywhere HEAD has moved. Each entry therefore shows when and how HEAD changed position. 
+
+`HEAD@{#}` is a time-based reference:
+- The number `#` is the nth previous position of HEAD.
+- `HEAD@{0}` is the most recent, current position. 
+- `HEAD@{1}` is where the HEAD was one position before that. 
+
 ```bash
-git commit -m <message>
+291a93a (HEAD -> main) HEAD@{0}: checkout: moving from develop to main
 ```
-- `[<optional placeholders>]
-- `--` standalone bashed indicate that whay follows is a path.
-```bash
-git checkout experiment
-#could be a file or path
+This means the most recent action was a checkout command, that moved HEAD from develop to main, and that ended at commit 291a93a.
+
+## Merging
+### Fast-forward Merge
+- Moves branch pointer forward, no divergence or creation of new commits. 
+- Keeps commit history linear, with no commits with multiple parents. 
+- Ideal for feature branches with no conflicts, as it is **only applicable when the target branch (the branch we want to merge to where we are now) is directly behind**.
+
+Before FF merge:
+```mermaid
+gitGraph
+	commit
+	branch develop
+	checkout develop
+	git commit
+	git commit tag: "HEAD"
 ```
-```bash
-git checkout --experiment
-# Is a file
+
+After FF merge:
+```mermaid
+gitGraph
+	commit
+	branch develop
+	checkout develop
+	git commit
+	git commit
+	checkout main
+	merge develop tag: "HEAD"
 ```
+
 
 ## Tags
 - Tags are references that point to specific points in Git history. Mark 
