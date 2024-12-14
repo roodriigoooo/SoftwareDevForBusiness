@@ -274,13 +274,12 @@ After FF merge:
 ```mermaid
 gitGraph
 	commit
-	branch develop
-	checkout develop
 	commit
-	commit
-	checkout main
-	merge develop tag: "HEAD"
+	commit tag: "main, HEAD"
 ```
+Git simply moved the `main` pointer forward to the last commit in `develop` because there was a direct linear path. No merge commit was needed. 
+
+The main takeaway here is that fast-forward merges are possible only when the target branch, in our case `main` has not moved since the `develop` branch was created.
 
 ### Merge Commits
 - Combines branches with different, non-linear histories.
@@ -316,6 +315,132 @@ gitGraph
 	commit
 	merge develop tag: "main, HEAD"
 ```
+
+**Note**: You can also use a merge commit when a FF merge is possible:
+```bash
+git merge --no-ff develop
+```
+
+## Resolving Merge Conflicts
+Merge Conflicts happen when, the same part of the same file are edited in different branches. Therefore, 3 commits are involved in a merge conflict:
+- The tip of the current branch, the HEAD. 
+- The tip of the branch to be merged, the branch label. 
+- A common ancestor. 
+```mermaid
+gitGraph
+	commit id: "A, a common ancestor"
+	branch develop
+	checkout develop
+	commit id: "C, branch label"
+	checkout main
+	commit id: "B, HEAD"
+```
+**Example**
+```mermaid
+gitGraph
+	commit id: "new file"
+	branch feature
+	checkout feature
+	commit id: "modified fileA"
+	checkout main
+	commit id: "modified fileA"
+```
+```bash
+#while on main
+git merge feature
+Auto-merging fileA.txt
+CONFLICT (content): Merge conflict in fileA.txt
+Automatic merge failed; fix conflicts and then commit the result.
+git status
+On branch main
+You have unmerged paths.
+	(fix conflicts and run "git commit")
+	(use "git merge --abort" to abort the merge)
+```
+`You have unmerged paths`: This means that there are files where Git could not automatically determine how to combine changes from both branches. Git does not know which changes to keep, so it marks these as unmerged paths - files that are in the intermediate state waiting for human resolution.
+
+These unmerged paths will contain special markers showing both versions of the conflicting changes:
+```terminal
+<<<<<<< HEAD
+changes from main branch
+========
+changes from feature branch
+>>>>>>> feature
+```
+At this point, we would have two options:
+- **Option 1**: Resolve the conflict.
+
+	- Edit the file(s) to remove conflict markers. 
+    - Choose which changes to keep.
+    - `git add` the resolved files.
+    - `git commit` to complete the merge.
+- **Option 2**: Use `git merge --abort`:
+
+	- This command backs out of the merge entirely. 
+    - Restores your working directory to the state it was in before starting the merge. 
+    - Useful when we need to rethink our merging strategy, want to try a different approach, realize we are merging in the wrong branch, need to make preparatory changes before the merge, etc. 
+
+## Fetch, Pull and Push
+Main commands to interact with remote repositories:
+
+### Clone
+- When starting to work on an already existing project. 
+- When creating a local copy of a repository for the first time. 
+- When setting up a new development environment.
+```bash
+#basic
+git clone <remote_url>
+
+# clone to a specific directory
+git clone <remote_url> my_project
+
+# Clone specific branch
+git clone -b develop <remote_url>
+
+# Clone only specific recent history (2 most recent commits)
+git clone --depth 2 <remote_url>
+```
+
+### Fetch
+- When we want to see what others have been working on. 
+- When checking if there are updated before merging. 
+- When updating our remote tracking branches. 
+- When we want to inspect changes before incorporating them. 
+```bash
+# fetch all branches from default remote (origin)
+git fetch
+
+# fetch from a specific remote called upstream
+git fetch upstream
+
+# fetch from a specific branch, from the default remote
+git fetch origin develop
+
+# fetch all remotes
+git fetch --all
+
+# prune deleted remote branches
+git fetch --prune
+```
+
+### Pull
+- When we want to update our local branch with remote changes. 
+- When we are ready to incorporate other's work into our local branch. 
+- When starting to work and need the latest changes first. 
+
+```bash
+# pull current branch from origin
+git pull
+
+# pull from specific remote and specific branch
+git pull origin main 
+
+# pull with rebase instead of merge
+git pull --rebase
+```
+
+### Push
+
 
 
 ## Tags
