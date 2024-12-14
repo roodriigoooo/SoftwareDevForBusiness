@@ -161,20 +161,12 @@ Using only `git branch`:
 ```mermaid
 gitGraph
 	commit
-	commit
+	commit id:"head is still here" type: HIGHLIGHT
 	branch new_branch
 	checkout main
-	commit
 ```
 `git checkout` is responsible for updating the HEAD reference, and of updating the working tree with the corresponding commit's (the new HEAD's) files.
-Using `git checkout -b`:
-```mermaid
-gitGraph
-	commit
-	commit
-	branch new_branch
-	checkout new_branch
-```
+
 
 ## On Git syntax
 ```bash
