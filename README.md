@@ -266,8 +266,8 @@ gitGraph
 	commit
 	branch develop
 	checkout develop
-	git commit
-	git commit tag: "HEAD"
+	commit
+	commit tag: "HEAD"
 ```
 
 After FF merge:
@@ -276,8 +276,8 @@ gitGraph
 	commit
 	branch develop
 	checkout develop
-	git commit
-	git commit
+	commit
+	commit
 	checkout main
 	merge develop tag: "HEAD"
 ```
