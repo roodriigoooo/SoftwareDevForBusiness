@@ -282,6 +282,41 @@ gitGraph
 	merge develop tag: "HEAD"
 ```
 
+### Merge Commits
+- Combines branches with different, non-linear histories.
+- **Creates a new commit to record the merge**. History shows branches merging together.
+- **Creates a commit with multiple parents**.
+- Used when branches have diverged (it is necessay for both branches to have new commits).
+
+Before Merge Commit:
+```mermaid
+gitGraph
+	commit id: "A"
+	branch develop
+	checkout develop
+	commit
+	commit tag: "develop, HEAD"
+	checkout main
+	commit 
+	commit tag: "main"
+```
+Notice that, from commit A, both branches have development, and have therefore diverged. 
+Also notice how, up to this point, all commits have a single parent. 
+
+After Merge Commit:
+```mermaid
+gitGraph
+	commit id: "A"
+	branch develop
+	checkout develop
+	commit 
+	commit
+	checkout main
+	commit
+	commit
+	merge develop tag: "main, HEAD"
+```
+
 
 ## Tags
 - Tags are references that point to specific points in Git history. Mark 
