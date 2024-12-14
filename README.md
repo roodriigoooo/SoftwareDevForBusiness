@@ -1,4 +1,4 @@
-# Software Development for Business: Version Control and Docker 
+# Software Development for Business: Version Control Using Git 
 
 # Git and Version Control
 
