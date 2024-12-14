@@ -161,6 +161,7 @@ gitGraph
 	commit
 	commit
 	branch new_branch
+	checkout main
 	commit
 ```
 
