@@ -114,7 +114,7 @@ gitGraph
 They make it easy to track, organize, and switch between different states 
 of a repository. 
 - A reference or `ref` in Git point to:
-	1. A specific commit SHA-1 hash. All commit sgenerate a unique 
+	1. A specific commit SHA-1 hash. All commits generate a unique 
 SHA-1 hash as an identifier, for tracking and integrity. 
 	2. Another, symbolic reference ('master', 'main', 
 'name_of_branch', etc.) 
@@ -128,7 +128,7 @@ reference. A branch is just a label for a commit.
 - A branch is a movable pointer to a commit. Its purpose 
 is to isolate work on a specific feature or bug fix. Default branches are 
 usually named main or master. 
-- Brances are independent lines of development of
+- Brances are independent lines of development.
 - A branch label is a reference that will point to the most recent commit 
 in that branch. 
 
