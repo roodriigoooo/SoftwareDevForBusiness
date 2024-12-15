@@ -266,19 +266,29 @@ Note that, since we are only deleting the branch labels and not the commits them
 git reflog # returns a local list of recent HEAD commits
 ```
 ```bash
-git branch -d develop
+git branch -d develop #develop contains unmerged changes
+
+#Output:
 error: The branch 'develop' is not fully merged. 
 If you are sure you want to delete it, run 'git branch -D develop'.
-git branch -D develop
+```
+```bash
+git branch -D develop #force the delete
+
+#Output:
 Deleted branch develop (was 98a93831). #hash of the branch label deleted
+```
+```bash
 git reflog
+
+#Output:
 291a93a (HEAD -> main) HEAD@{0}: checkout: moving from develop to main
 98a93831 HEAD@{1}: commit: new experiment
+```
+```bash
+# we use the output above to know what to checkout
 git checkout -b develop 98a93821
 Switched to a new branch 'develop'
-## On Git syntax
-```bash
-git [command][--flags][arguments]
 ```
 **Breakdown of the above**:
 The `reflog` is like Git's local journal of everywhere HEAD has moved. Each entry therefore shows when and how HEAD changed position. 
