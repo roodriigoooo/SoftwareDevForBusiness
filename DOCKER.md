@@ -103,9 +103,214 @@ $ docker run -i -t ubuntu bin/bash
 ```
 **Common `docker run` options**:
 - `-d` (Detached mode): Runs the container in the background. 
-- `p` (Port mapping): Maps a port on the host to a port on the container. `-p 8080:80` maps port 80 in the container to port 8080 on the host. 
-- `-e` (Environment variables): Sets environment variables inside the container. 
-- `--name`: Assigns a name to the container.
-- `it` or `-i` (interactive) and `-t` (psuedo-terminal): Allows us to interact with the container's terminal. Useful for containers that need user input or have a shell interface.
+```bash
+# run nginx web server in the background
+docker run -d nginx
 
-### Creating a Dockerfule
+# run detached container with name and ports
+docker run -d --name webserver nginx -p 8080:80
+
+# verify its running in the background
+docker ps
+```
+- `p` (Port mapping): Maps a port on the host to a port on the container. `-p 8080:80` maps port 80 in the container to port 8080 on the host. 
+```bash
+# map single port
+docker run -p 8080:80 nginx
+
+# map multiple ports
+docker run -p 8080:80 -p 443:443 nginx
+```
+- `-e` (Environment variables): Sets environment variables inside the container. 
+```bash
+# single environment variabke
+docker run -e "DEBUG=true" my_app
+
+# multiple env variables
+docker run -e "DB_HOST=localhost" -e "DB_PORT=5432" postgres
+
+# using env files
+docker run --env-file ./env.conf mysql
+```
+- `--name`: Assigns a name to the container.
+```bash
+docker run --name myapp web-app 
+
+#reference named container in other commands
+docker exec -it myapp bash
+docker logs myapp
+```
+- `it` or `-i` (interactive) and `-t` (psuedo-terminal): Allows us to interact with the container's terminal. Useful for containers that need user input or have a shell interface.
+```bash
+#basic interactive shell
+docker run -it ubuntu bash 
+
+#interactive with name and removal on exit
+docker run -it --rm --name temp ubuntu bash
+```
+
+### Creating a Dockerfile
+
+**Very basic example:**
+```Dockerfile
+FROM Ubuntu 
+
+RUN apt-get update
+RUN apt-get python
+
+RUN pip install numpy
+
+COPY ./opt/code
+# we can copy the code from the current directory to a specific path inside the container.
+.
+.
+.
+```
+- All Dockerfiles must start with a FROM instruction, which specifies the base OS or another image as the foundation (base image). 
+- `apt-get` is a command in Linux used to install, update and remove software. 
+- We can install dependencies: `RUN pip install numpy`, `RUN pip install -r requirements.txt`
+
+#### More comprehensive examples
+
+**1. FROM**:
+```bash
+# basic usage
+FROM ubuntu:22.04
+
+#multi-stage builds
+FROM node:16 AS builder
+FROM python:3.9-slim AS final
+```
+- FROM specifies the base image. 
+- It can use multiple stages to reduce final image size.
+
+    - Multi-stage builds allow a final image to include only the built applications, and not all the build tools and dependencies. This reduces the size of the image. 
+    - By separating build and runtime environments, secrets and sensitive information such as API keys stay in the build stage, and source code and build tools are not in the production image.
+```bash
+# real-life example
+# without multi-stage: 1GB image
+FROM node:16
+COPY . .
+RUN npm install 
+RUN npm run build 
+CMD ["npm", "start"]
+
+# with multi-stage: 100MB image
+FROM node:16 AS builder
+COPY . .
+RUN npm install && npm run build
+
+FROM node:alpine
+COPY --from=builder /app/dist ./dist
+CMD ["npm", "start"]
+```
+
+**2. ENV**:
+```bash
+# single environment variable
+ENV NODE_ENV=production
+
+# multiple variables
+ENV APP_HOME=/app \
+    PORT=8080 \
+    DEBUG=false
+#or
+ENV APP_HOME=/app 
+ENV PORT=8080
+ENV DEBUG=false
+```
+- ENV sets environmental variables tht persist in the container. 
+- It is used for configuration.
+
+**3. RUN**:
+```bash
+# shell form
+RUN apt-get update && \
+    apt-get install -y python3
+    
+# exec form
+RUN ["pip", "install", "numpy"]
+```
+- RUN executes commands during build. 
+- It is best practice to combine commands to reduce layers. 
+
+**4. COPY**:
+```bash
+COPY ./app /app/
+COPY config.* /config/
+```
+- COPY simply copies from one path to the other one. 
+- In this case, the first path, `./app` is the source directory on your host machine, relative to the Dockerfile's location. 
+- The second path `/app/` is the destination directory inside the container (the absolute path).
+
+Example directory structure
+```bash
+your_project/
+├── Dockerfile
+├── app/
+│   ├── main.py
+│   └── config.json
+├── tests/
+└── README.md
+```
+The current directory `.` is wherever your Dockerfile is located. If we run `docker build` from `your_project/`, this would become our build context, and all COPY paths are relative to that location.
+
+**Note**: You can't COPY files from outside your build context. `COPY ../other_project/file.txt /app/` would fail because it tries to access files outside the build context. 
+
+**5. WORKDIR**:
+```bash
+WORKDIR /app 
+COPY . . # copies to /app now
+```
+- WORKDIR sets the working directory for subsequent commands. 
+- If the directory does not exist, it creates it. 
+
+**6. VOLUME**:
+```bash
+# single volume
+VOLUME /data 
+
+# multiple volumnes
+VOLUME ["/data", "/logs", "/config"]
+```
+**7. CMD**:
+```bash
+# simple web server
+CMD ['python', 'app.py']
+
+# default command with arguments
+CMD ['npm', 'start']
+# could be overriden with: docker run myimage python other_script.py
+```
+- CMD specifies the default command to run when starting the container. 
+- **It can be overriden from the command line when running the container.** For example:
+```bash
+# Case 1: Uses Dockerfile CMD
+docker run myimage
+# this will simply execute python app.py (our CMD instruction in the Dockerfile)
+
+# Case 2: Overrides CMD completely
+docker run myimage python other_script.py
+# this will execute python other_script.py
+
+docker run myimage echo "hello"
+# this will echo: "hello"
+```
+### Building the Dockerfile
+Once the Dockerfile is created, we need to build its corresponding Docker image. 
+```bash
+docker build -t image_name:version .
+
+#example
+docker build -t python_app:1.0 .
+```
+- Version is optional. 
+- `.` specifies that Docker should look for the Dockerfile in the current directory.
+
+**Recall that each line of the Dockerfile is a separate layer, or step**. If an error occurs at any given layer, Docker stops and shows the error message. One we solve the error, **Docker only rebuilds from the failed step onward**, saving time with cached layers. 
+```bash
+docker history image_name #shows the history of an image, listing all the layers that were created during its build process
+```
+## Docker Compose
+
+
