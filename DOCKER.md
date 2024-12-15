@@ -27,6 +27,7 @@
      - [Data Persistence](#data-persistence)
  - [Docker Networking](#docker-networking)
    - [Bridge Network (Default)](#bridge-network-default)
+   - [Subnet, Subnet Masks and Gateway](#subnet-subnet-masks-and-gateway)
    - [Host Network](#host-network)
    - [None Network](#none-network)
    - [Custom Docker Networks](#custom-docker-networks)
@@ -544,6 +545,28 @@ Docker uses network modes to determine how containers connect to the outside wor
 - Bridge mode: Default mode, containers communicate through a private virtual network. 
 - Host mode: Containers share the host machine's network. 
 - None: No networking for the container. 
+
+### Subnet, Subnet Masks and Gateway
+- **Subnet**: A logical subdivision of an IP network. It helps organize and manage network traffic. 
+```commandline
+192.168.1.0 = Network address (base address)
+/24 = Subnet mask length (number of bits)
+```
+- **Subnet Mask**: 
+A subnet configuation of 192.168.1.0/24 provides 254 usable IP addresses: (192.168.1.1-192.168.1.254)
+```text 
+- 192.168.1.0/24 means:
+- first 24 bits (3 octets):  network portion
+- last 8 bits: host portion
+
+With 8 bits for hosts (32-24=8):
+Total possible combinations = 2^8 = 256 addresses
+BUT:
+- first address (192.168.1.0) = network address
+- last address (192.168.1.255) = broadcast address
+Therefore, 254 usable addresses.
+```
+- **Gateway**: Usually the first usable IP (192.168.1.1). It acts as the router/entry point for the network, and it handles traffic between different networks.
 
 ### Bridge Network (Default)
 - Containers are connected to a private virtual network managed by Docker. 
