@@ -312,5 +312,108 @@ docker build -t python_app:1.0 .
 docker history image_name #shows the history of an image, listing all the layers that were created during its build process
 ```
 ## Docker Compose
+Docker Compose is used to run multiple services.
+- It uses a YAML file to configure application services: `docker-compose.yml`.
+- It simplifies setup by specifying all dependencies and configurations in one file. 
+```bash
+docker-compose up #to start services
+docker-compose down #to stop and remove services
+docker-compose up --build #build and start
+docker-compose up -d #start in detached mode
+docker-compose logs -f #view logs
+docker-compose ps #view running service
+```
 
+### Example from class
+```bash
+# Data Layers
+docker run -d --name=redis redis #redis
+docker run -d --name=db postgres #postgres
+
+# Application Layers
+docker run -d --name=vote -p 5000:80 voting-app
+docker run -d --name=result -p 5001:80 result_app
+
+#Worker
+docker run d --name=worker worker #worker
+```
+The commands above create the necessary containers, defines the necessary names, and the necessary ports. 
+It, however, **does not establish connections between containers**, which are needed for the application to work. 
+```bash
+# Linking commands
+docker run -d --name=vote -p 5000:80 --link redis:redis voting_app
+docker run -d --name=result -p 5001:80 --link db:db result_app 
+docker run -d --name=worker --link redis:redis --link db:db worker
+# link syntax: container name:name of the host inside the service
+```
+The networking done above can be simplified through a `docker-compose.yml` file:
+```yaml
+redis:
+  image: redis
+db:
+  image: postgres:version
+vote:
+  image: voting-app
+  ports:
+    - 5000:80
+  links:
+    - redis
+result: 
+  image: result-app
+  ports:
+    - 5001:80
+  links:
+    - db
+worker:
+  image: worker
+  links:
+    - redis
+    - db
+```
+There are 3 different version of Docker Compose:
+1. Version 1: Basic, no advanced features. 
+2. Version 2: Added network, volumes and service dependencies. Added `depends_on` instead of links. Version must be added at the beginning of the file. 
+3. Version 3: Same config as version 2, but better for scaling and deployment. 
+
+```yaml
+#version 3 
+version: 3
+service:
+  redis: 
+    image: redis
+    networks:
+      - back-end
+  db:
+    image: postgres:version
+    networks:
+      - back-end
+  vote:
+    build: ./voting-app
+    ports: 
+      - 5000:80
+    depends_on:
+      - redis
+    networks:
+      - back-end
+      - front-end
+  result:
+    build: ./result-app
+    ports:
+      - 5001:80
+    depends_on:
+      - db
+    networks:
+      - back-end
+      - front-end
+  worker:
+    build: ./worker
+    depends_on: 
+      - redis
+      - db
+    networks:
+      - back-end
+networks:
+  front-end
+  back-end
+```
 
