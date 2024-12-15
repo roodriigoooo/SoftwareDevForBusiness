@@ -1,5 +1,26 @@
 # Docker 
 
+## Table of Contents
+
+ - [Why We Use Docker](#why-we-use-docker)
+ - [Docker Structure and Architecture](#docker-structure-and-architecture)
+   - [The Docker daemon](#the-docker-daemon)
+   - [The Docker client](#the-docker-client)
+   - [Docker registries](#docker-registries)
+ - [Docker Objects](#docker-objects)
+   - [Images](#images)
+   - [Containers](#containers)
+     - [Containers Sharing the Kernel](#containers-sharing-the-kernel)
+     - [Sharing the Kernel vs. VMs Each with their Own Kernel](#sharing-the-kernel-vs-vms-each-with-their-own-kernel)
+     - [Virtual Machines AND Docker](#virtual-machines-and-docker)
+ - [Example docker run command](#example-docker-run-command)
+ - [Dockerfile and Docker Image](#dockerfile-and-docker-image)
+   - [Creating a Dockerfile](#creating-a-dockerfile)
+     - [More comprehensive examples](#more-comprehensive-examples)
+   - [Building the Dockerfile](#building-the-dockerfile)
+ - [Docker Compose](#docker-compose)
+   - [Example from class](#example-from-class)
+
 ## Why We Use Docker
 - Docker streamlines the development lifecycle by allowing developers to work in standardized environments. 
 - It allows for the creation of local containers providing applications and services, which are great for continuous integration and delivery.
