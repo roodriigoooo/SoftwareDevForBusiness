@@ -437,4 +437,247 @@ networks:
   front-end
   back-end
 ```
+## Docker System
+Key components of Docker's layered system include:
+- Images: Stored in `/var/lib/docker/images`. Represented by unique IDs. 
+- Containers: Stored in `/var/lib/docker/containers`. Logs, metadata, and runtime configurations are stored here. 
+- Volumes: Stored in `/var/lib/docker/volumes`. They are decoupled from containers for data persistence. 
+
+**Recall that each line in a Dockerfile creates a layer in the Docker image**.
+
+### Data Management in Containers
+
+#### Creating New Data in Containers
+- New data can be created inside the container. This data will only exist as long as the container is running. 
+```bash
+#start a container
+docker run -it ubuntu bash
+
+#inside container:
+touch newfile.txt # create a new file
+echo "data" > newfile.txt
+mkdir newdir   # create a new directory
+#these files/dirs only exist in the container's filesystem
+```
+#### Modifying Files from the Image
+- Files inside images can be modified. First, we create a copy of the file inside the container:
+```bash
+# original container state from image
+/app/
+  ├── app.py (read-only from image)
+  └── config.json (read-only from image)
+  
+# when you modify files:
+docker run -it myapp bash
+
+# inside container
+cp /app/app.py /app/app.py.modified #create writable copy
+vim /app/app.py.modifed #make changes
+```
+The original files in the image remain read-only; you work with copies in the container layer. 
+
+#### Data Persistence
+There are two main ways to persist data:
+1. Volume
+
+Create a Docker Volume, and mount the volume to the container. 
+If the volume does not exist when using the `-v` flag, Docker will automatically create it. 
+```bash
+docker volume create new_volume
+#creates a persistent volume named new_volume
+
+docker run -v new_volume:/app/data myapp 
+#docker run -v new_volume:path_inside_container image
+
+# data in /app/data persists even after container is removed.
+# this data can be reused by other containers.
+```
+2. Bind Mounts
+
+Mount a host directory to the container. In this case, changes in the container will reflect in the host directory, and viceversa.
+```bash
+docker run -v /local/path:path_inside_container
+```
+**Example**:
+```bash
+# start container
+docker run -it --name test ubuntu bash
+
+# inside container:
+echo "important data" > /data/myfile.txt
+exit
+
+# remove container
+docker rm test
+
+# data is gone! unless we used a volume:
+docker run -it --name test -v mydata:/data ubuntu bash
+# now /data/myfile.txt persists between container restarts/removals
+```
+
+## Docker Networking
+- A network is a system of interconnected devices that can communicate and share data.
+- Networks are composed of devices (computers, phones, servers, etc), Routers (direct traffic) and Protocols (rules for communication, e.g., TCP/IP).
+
+An IP (Internet Protocol) address is a unique identifier for a device on a network. 
+- IPv4: 192.168.1.1 (32-bit, most common).
+- IPv6: 2001:0db8:85a3:0000:0000:8a2e:0370:7334 (128-bit, newer standard).
+
+Devices use IP addresses to send and receive data.
+Docker uses network modes to determine how containers connect to the outside world and to each other. 
+- Bridge mode: Default mode, containers communicate through a private virtual network. 
+- Host mode: Containers share the host machine's network. 
+- None: No networking for the container. 
+
+### Bridge Network (Default)
+- Containers are connected to a private virtual network managed by Docker. 
+- Best for containter-to-container communication, as each container gets its own IP address.
+- Another key feature is internal DNS resolution between containers.
+
+```bash
+# list current networks
+docker network ls 
+
+# create custom bridge network
+docker network create --driver bridge my_network
+
+# run container with specific network and IP
+docker run --network my_network --ip 172.18.0.10 nginx
+```
+**Note**: The resulting bridge network is isolated from other bridge networks. 
+
+### Host Network 
+- In host network mode, the container uses the same network as the host machine. It only works on Linux hosts. 
+- Containers do not get their own IP address, they use the host's UP and ports. 
+- Since there is port sharing between the host and the container, conflicts can occur.
+
+```bash
+docker run --network host nginx
+# the nginx container would be accessible at the host's IP address.
+```
+
+### None Network
+- In none mode, the container is isolated from all networks, and no network interfaces are assigned. 
+- Use case: Highly secure containers don't need network connectivity. 
+```bash
+docker run --network none nginx
+```
+
+### Custom Docker Networks
+Custom docker networks enhance the control over container communication. They also create better security and isolation. 
+
+```bash
+docker network create my_custom_network
+docker network inspect <network_name>
+```
+Example: You have a frontend container and a backend container that need to communicate. 
+```bash
+# create a custom network:
+docker network create app_network
+
+# connect containers to the network
+docker run --network app_network --name frontend frontend_image
+docker run --network app_network --name backend backend_image
+
+# verify the communication
+docker exec -it frontend ping backend
+```
+### Network Managements Commands
+```bash
+# create network
+docker network create my_network
+## you can also pass --driver, --subnet, --gateway flags
+
+# remove network
+docker network rm my_network
+
+# show network details and debug network issues
+docker network inspect my_network
+
+#check container networking
+docker inspect container_name | grep IPAddress
+
+# test container connectivity
+docker exec container_name ping other_container
+```
+### Docker Hub and Private Repositories
+Docker Hub allows creating private repositories to restrict access.
+Steps to upload:
+```bash
+# login to Docker hub from the terminal
+docker login 
+
+# tag the image with your Docker Hub username
+docker tag my_image username/repository:tag
+docker push username/repository:tag
+
+#example
+docker tag my_app john123/my_app:v1
+docker push john123/my_app:v1
+```
+Recall that private registries, self-hosted solutions for storing Docker images, can be used.
+```bash
+#start the registry container
+docker run -d -p 5000:5000 --name registry registry:2
+
+# tag and push an image
+docker tag my_image localhost:5000/my_image
+docker push localhost:5000/my_image
+
+# pull the image from your registry
+docker pull localhost:5000/my_image
+```
+## Docker Orchestration
+### Why Use Docker Orchestration
+- Manage multiple containers across multiple hosts. 
+- Ensure availability and scalability. 
+- Automate failover and recovery. 
+- Streamline complex workflows in production.
+
+### Key Concepts in Orchestration
+- Cluster: A group of machines (physical or virtual) working together. 
+- Nodes: Machines in the cluster (master and worker nodes).
+- Services: Define how containers are deployed and accessed.
+- Tasks: Individual instances of a container.
+
+### Popular Orchestration Tools
+- Docker Swarm: Built-in tool by Docker. Simple and tightly integrated with Docker CLI. 
+```bash
+# init a swarm
+docker swarm init
+
+# add worker nodes to the swarm
+docker swarm join-token worker
+
+# deploy a service
+docker service create --replicas 3 nginx
+
+# view the running services
+docker service ls
+```
+- Kubernetes: Industry-standard. Supports advanced features like auto-scaling and self-healing.
+
+    - Self-healing: Restarts failed containers. 
+    - Rolling updates and rollbacks.
+    - Auto-scaling and load balancing. 
+
+- Basic Concepts:
+
+    - Pods: Smallest deployable unit, can contain one or more containers. 
+    - Deployments: Define the desired state of your application. 
+    - Services: Expose your pods to the network
+```bash
+# create the deployment
+kubectl create deployment my-app --image=nginx
+
+#expose the deployment
+kubectl expose deployment my-app --type=NodePort --port=80
+
+#scale the application
+kubectl scale deployment my-app --replicas=3
+
+# view running pods
+kubectl get pods
+```
+- Others: Apache Mesos, Nomad
 
