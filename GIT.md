@@ -307,7 +307,7 @@ This means the most recent action was a checkout command, that moved HEAD from d
 ### Fast-forward Merge
 - Moves branch pointer forward, no divergence or creation of new commits. 
 - Keeps commit history linear, with no commits with multiple parents. 
-- Ideal for feature branches with no conflicts, as it is **only applicable when the target branch (the branch we want to merge to where we are now) is directly behind**.
+- Ideal for feature branches with no conflicts, as it is **only applicable when the target branch (the branch that will receive the changes, the one we are merging into) is directly behind**.
 
 Before FF merge:
 ```mermaid
