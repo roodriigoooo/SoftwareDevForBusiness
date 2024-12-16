@@ -720,3 +720,110 @@ kubectl get pods
 ```
 - Others: Apache Mesos, Nomad
 
+
+## Container Commands
+```bash
+# List containers
+docker container ls          # List running containers
+docker container ls -a       # List all containers (including stopped)
+
+# Container operations
+docker container start <container>      # Start a container
+docker container stop <container>       # Stop a container
+docker container rm <container>         # Remove a container
+docker container rm -f <container>      # Force remove a running container
+
+# Container inspection
+docker container inspect <container>    # View container details
+docker container logs <container>       # View container logs
+docker container stats                  # View container resource usage
+
+# Container interaction
+docker container exec -it <container> <command>  # Execute command in running container
+docker container attach <container>              # Attach to container's main process
+```
+
+## Image Commands
+```bash
+# List images
+docker image ls             # List all images
+docker image ls -a          # List all images (including intermediates)
+
+# Image operations
+docker image pull <image>   # Pull an image
+docker image rm <image>     # Remove an image
+docker image prune         # Remove unused images
+
+# Image inspection
+docker image inspect <image>    # View image details
+docker image history <image>    # View image layer history
+```
+
+## Volume Commands
+```bash
+# List volumes
+docker volume ls           # List all volumes
+
+# Volume operations
+docker volume create <volume>    # Create a volume
+docker volume rm <volume>        # Remove a volume
+docker volume prune             # Remove all unused volumes
+
+# Volume inspection
+docker volume inspect <volume>   # View volume details
+```
+
+## Network Commands
+```bash
+# List networks
+docker network ls          # List all networks
+
+# Network operations
+docker network create <network>    # Create a network
+docker network rm <network>        # Remove a network
+docker network prune              # Remove all unused networks
+
+# Network inspection
+docker network inspect <network>   # View network details
+docker network connect <network> <container>     # Connect container to network
+docker network disconnect <network> <container>  # Disconnect container from network
+```
+
+## System Commands
+```bash
+# System information
+docker system info        # Display system-wide information
+docker system df         # Show docker disk usage
+
+# Clean up
+docker system prune      # Remove unused data
+docker system prune -a   # Remove all unused data (including images)
+```
+
+## Docker Compose Commands
+```bash
+# Basic operations
+docker-compose up        # Create and start containers
+docker-compose down      # Stop and remove containers
+docker-compose start     # Start services
+docker-compose stop      # Stop services
+
+# Service operations
+docker-compose ps        # List containers
+docker-compose logs      # View output from containers
+docker-compose exec <service> <command>   # Execute command in running container
+
+# Build operations
+docker-compose build    # Build or rebuild services
+docker-compose pull     # Pull service images
+```
+
+### Common Flags
+- `-f` or `--force`: Force an operation
+- `-v`: Remove associated volumes
+- `-a` or `--all`: Show all objects (including stopped/unused)
+- `-q` or `--quiet`: Only display IDs
+- `--rm`: Automatically remove container when it exits
+- `-d` or `--detach`: Run container in background
+- `-it`: Interactive mode with pseudo-TTY
+
